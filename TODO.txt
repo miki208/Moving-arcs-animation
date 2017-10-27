@@ -1,0 +1,4 @@
+- Center the figures inside the canvas
+- Refactor
+- Write comments
+- Minor fixes and additions
