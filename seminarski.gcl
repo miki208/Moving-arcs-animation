@@ -1,0 +1,163 @@
+procedure mod {num1 num2 res}
+{
+	expression res {num1 - floor(num1 / num2) * num2}
+}
+
+procedure transform_angle {ang new_ang type}
+{
+	% 360 + (140 + 360 + 330) + 360
+	% 500 + 360 + 360
+
+	if_then_else {type == 1} {
+		call mod {ang 1550 new_ang}
+		if_then_else {new_ang < 360 || new_ang > 1190} {
+			if_then_else {new_ang > 1190} {
+				expression new_ang {-(new_ang - 1190)}
+			} { }
+		} {
+			expression new_ang {359.9}
+		}
+	} {
+	if_then_else {type == 2} {
+		call mod {ang 1550 new_ang}
+		if_then_else {new_ang <= 500 || new_ang >= 1220} {
+			expression new_ang {0}
+		} {
+			if_then_else {new_ang > 500 && new_ang < 860} {
+				expression new_ang {new_ang - 500}
+			} {
+				expression new_ang {-(new_ang - 500 - 360)}
+			}
+		}
+	} {
+		expression tmp {floor(ang / 360)}
+		call mod {tmp 2 tmp}
+		call mod {ang 360 new_ang}
+		if_then_else {tmp == 1}
+		{
+			expression new_ang {-new_ang}	
+		} { }
+	}
+	}
+}
+
+procedure draw {x y size ang1 ang2 type}
+{
+	number type1 3
+	number type2 3
+	if_then_else {type == 1} {
+		expression type1 {1}
+		expression type2 {2}
+	} { }
+	call transform_angle {ang1 ang1 type1}
+	call transform_angle {ang2 ang2 type2}
+
+	number x1 x
+	number y1 y
+	point P1 x1 y1
+
+	number x2 x1
+	number y2 y1
+	expression x2 {x1 + size}
+	point P2 x2 y2
+
+	number x3 x1
+	number y3 y1
+	expression y3 {y1 + size}
+	point P3 x3 y3
+
+	number x4 x1
+	number y4 y1
+	expression x4 {x1 + size}
+	expression y4 {y1 + size}
+	point P4 x4 y4
+
+	%cmark_lt P1
+	%cmark_lt P2
+	%cmark_lt P3
+	%cmark_lt P4
+
+	%drawsegment P1 P2
+	%drawsegment P2 P4
+	%drawsegment P4 P3
+	%drawsegment P3 P1
+
+	expression xc {x1 + size / 2}
+	expression yc {y1 + size / 2}
+	point PC xc yc
+
+	if_then_else {ang1 != 0} {
+		midpoint PC1 P1 PC
+		rotate  P1 PC1 -90 PC
+		fillarc PC1 P1 ang1
+
+		midpoint PC4 P4 PC
+		rotate P4 PC4 -90 PC
+		fillarc PC4 P4 ang1
+	} { }
+	
+	if_then_else {ang2 != 0} {
+		midpoint PC2 P2 PC
+		rotate P2 PC2 -90 PC
+		fillarc PC2 P2 ang2
+
+		midpoint PC3 P3 PC
+		rotate P3 PC3 -90 PC
+		fillarc PC3 P3 ang2
+	} { }
+}
+background 0 0 0
+dim 150 150
+point I 0 0 56480 0
+
+number j 1
+number tmp 0
+number x 85
+number y 125
+
+while {j <= 7}
+{
+	call mod { j 2 tmp }
+	number k 0
+	number len j
+	if_then_else {len > 4}
+	{
+		expression len {8 - len}
+		expression x {x + 20}
+	} {
+		expression x {x - 20}
+	}
+
+	while { k < len }
+	{
+		getx i1 I
+		expression addition {4 * sin(i1 / 19.74 * 2 * 3.14 / 90)}
+		if_then_else {tmp == 1}
+		{
+			expression size {15 + 5 * sin(i1 / 19.74 * 2 * 3.14 / 90)}
+			expression tmpx {x + k * 40 + addition}
+			expression i1 {i1 / (8 - j)}
+			expression i2 {i1 + tmp * 360}
+			color 135 206 250
+			call draw { tmpx y size i1 i1 1 }
+		}{
+			expression size {15 + 5 * cos(i1 / 19.74 * 2 * 3.14 / 90)}
+			expression tmpx {x + k * 40 - addition}
+			expression i1 {i1 / j}
+			expression i2 {i1  + tmp * 360}
+			 color 138 43 226
+			 call draw { tmpx y size i2 i1 2 }
+		}
+		
+		expression k {k + 1}
+	}
+	expression j {j + 1}
+	expression y {y - 20}
+}
+
+animation_frames 2880 60
+
+
+
+
+
