@@ -114,8 +114,8 @@ procedure draw {x y size ang type}
 }
 
 number size 15
-expression width {1.52 * 7 * size}
-expression height {1.52 * 7 * size}
+expression width {1.54 * 7 * size}
+expression height {1.54 * 7 * size}
 expression x {width / 2 -  size / 2} % x coord of the starting point
 expression y {height - 1.5 *  size} % y coord of the starting point
 point I 0 0 6480 0 % for every frame of animation, it's increased by 20 (6480 points / 324 frames)
@@ -165,7 +165,5 @@ while {row <= 7}
 }
 
 animation_frames 324 50
-
-
 
 
