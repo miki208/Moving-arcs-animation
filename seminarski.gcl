@@ -3,39 +3,43 @@ procedure mod {num1 num2 res}
 	expression res {num1 - floor(num1 / num2) * num2}
 }
 
-% For a given iteration and type of figure, function calculates the angle
+% For a given iteration and type of figure, function calculates the angle of an arc
+% type = 1: bottom-left and top-right arcs on a blue figure
+% type = 2: bottom-right and top-left arcs on a blue figure
+% type = 3: purple figure
 procedure calculate_angle {iteration type res_angle}
 {
-	% 1620 = 360 + (225 + 360 + 315) + 360
-	% 1620 = (585) + 360 + 360 + (315)
 	if_then_else {type == 1} {
-		call mod {iteration 1620 res_angle}
+		% 1620 iterations = growing by 360 degrees + (225 + 360 + 315 pause) + decreases by 360 degrees
+
+		% determines the angle by position in current period of movement
+		call mod {iteration 1620 res_angle}		
 		if_then_else {res_angle < 360 || res_angle > 1620 - 360} {
-			if_then_else {res_angle > 1620 - 360} {
+			if_then_else {res_angle > 1620 - 360} { % increase or decrease the angle
 				expression res_angle {-(res_angle - (1620 - 360))}
 			} { }
-		} {
-			expression res_angle {359.9}
+		} { % pause
+			expression res_angle {359.9} %temporary fix for fillarc bug
 		}
 	} {
 	if_then_else {type == 2} {
+		% 1620 iterations = (585 pause) + growing by 360 degrees + decreases by 360 degrees + (315 pause)
+
+		% determines the angle by position in current period of movement
 		call mod {iteration 1620 res_angle}
-		if_then_else {res_angle <= 585  || res_angle >= 1620 - 315} {
+		if_then_else {res_angle <= 585  || res_angle >= 1620 - 315} { %pause
 			expression res_angle {0}
 		} {
-			if_then_else {res_angle > 585 && res_angle < 585 + 360} {
+			if_then_else {res_angle > 585 && res_angle < 585 + 360} { % increase the angle
 				expression res_angle {res_angle - 585}
-			} {
+			} { % decrease the angle
 				expression res_angle {-(res_angle - 585 - 360)}
 			}
 		}
-	} {
-		expression tmp {floor(iteration / 360)}
-		call mod {tmp 2 tmp}
-		call mod {iteration 360 res_angle}
-		if_then_else {tmp == 1}
-		{
-			expression res_angle {-res_angle}	
+	} { % type = 3
+		call mod {iteration 720 res_angle}
+		if_then_else {res_angle > 360} { %decrease the angle
+			expression res_angle {-res_angle + 360}	
 		} { }
 	}
 	}
@@ -147,6 +151,7 @@ while {j <= 7}
 }
 
 animation_frames 324 50
+
 
 
 
