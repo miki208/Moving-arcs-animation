@@ -45,42 +45,54 @@ procedure calculate_angle {iteration type res_angle}
 	}
 }
 
-procedure draw {x y size ang1 ang2 type}
+% draws a blue or purple figure depending on the type of figure
+% type = 1: draw blue figure
+% type = 2: draw purple figure
+procedure draw {x y size ang type}
 {
-	number type1 3
-	number type2 3
+	% type = 1: blue figure (calculate angles of a blue figure
+	% type = 2: purple figure (calculate the angle of a purple figure)
 	if_then_else {type == 1} {
-		expression type1 {1}
-		expression type2 {2}
-	} { }
-	call calculate_angle {ang1 type1 ang1}
-	call calculate_angle {ang2 type2 ang2}
+		number type1 1
+		number type2 2
+	} {
+		number type1 3
+		number type2 3 
+	}
 
+	call calculate_angle {ang type1 ang1}
+	call calculate_angle {ang type2 ang2}
+
+	% bottom left point
 	number x1 x
 	number y1 y
 	point P1 x1 y1
 
+	% bottom right point
 	number x2 x1
 	number y2 y1
 	expression x2 {x1 + size}
 	point P2 x2 y2
 
+	% top left point
 	number x3 x1
 	number y3 y1
 	expression y3 {y1 + size}
 	point P3 x3 y3
 
+	% top right point
 	number x4 x1
 	number y4 y1
 	expression x4 {x1 + size}
 	expression y4 {y1 + size}
 	point P4 x4 y4
 
+	% coords of the center
 	expression xc {x1 + size / 2}
 	expression yc {y1 + size / 2}
 	point PC xc yc
 
-	if_then_else {ang1 != 0} {
+	if_then_else {ang1 != 0} { % draw bottom-left and top-right arcs if the angle is different from 0
 		midpoint PC1 P1 PC
 		rotate  P1 PC1 -90 PC
 		fillarc PC1 P1 ang1
@@ -90,7 +102,7 @@ procedure draw {x y size ang1 ang2 type}
 		fillarc PC4 P4 ang1
 	} { }
 	
-	if_then_else {ang2 != 0} {
+	if_then_else {ang2 != 0} { % draw bottom-right and top-left arcs if the angle is different from 0
 		midpoint PC2 P2 PC
 		rotate P2 PC2 -90 PC
 		fillarc PC2 P2 ang2
@@ -135,13 +147,13 @@ while {j <= 7}
 			expression tmpx {x + k * 40 + addition}
 			expression i1 {i1 * ceil(j/2) / 4}
 			color 135 206 250
-			call draw { tmpx y size i1 i1 1 }
+			call draw { tmpx y size i1 1 }
 		}{
 			expression size {15 + 5 * cos( i1 / 20 * 2 * 3.14 / 81)}
 			expression tmpx {x + k * 40 - addition}
 			expression i1 {4/3 * i1 / j}
 			 color 138 43 226
-			 call draw { tmpx y size i1 i1 2 }
+			 call draw { tmpx y size i1 2 }
 		}
 		
 		expression k {k + 1}
