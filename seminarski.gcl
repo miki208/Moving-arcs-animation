@@ -4,12 +4,12 @@ procedure mod {num1 num2 res}
 }
 
 % For a given iteration and type of figure, function calculates the angle of an arc
-% type = 1: bottom-left and top-right arcs on a blue figure
-% type = 2: bottom-right and top-left arcs on a blue figure
-% type = 3: purple figure
+% type = 0: bottom-left and top-right arcs on a blue figure
+% type = 1: bottom-right and top-left arcs on a blue figure
+% type = 2: purple figure
 procedure calculate_angle {iteration type res_angle}
 {
-	if_then_else {type == 1} {
+	if_then_else {type == 0} {
 		% 1620 iterations = growing by 360 degrees + (225 + 360 + 315 pause) + decreases by 360 degrees
 
 		% determines the angle by position in current period of movement
@@ -22,7 +22,7 @@ procedure calculate_angle {iteration type res_angle}
 			expression res_angle {359.9} %temporary fix for fillarc bug
 		}
 	} {
-	if_then_else {type == 2} {
+	if_then_else {type == 1} {
 		% 1620 iterations = (585 pause) + growing by 360 degrees + decreases by 360 degrees + (315 pause)
 
 		% determines the angle by position in current period of movement
@@ -36,7 +36,7 @@ procedure calculate_angle {iteration type res_angle}
 				expression res_angle {-(res_angle - 585 - 360)}
 			}
 		}
-	} { % type = 3
+	} { % type = 2
 		call mod {iteration 720 res_angle}
 		if_then_else {res_angle > 360} { %decrease the angle
 			expression res_angle {-res_angle + 360}	
@@ -46,18 +46,18 @@ procedure calculate_angle {iteration type res_angle}
 }
 
 % draws a blue or purple figure depending on the type of figure
+% type = 0: draw purple figure
 % type = 1: draw blue figure
-% type = 2: draw purple figure
 procedure draw {x y size ang type}
 {
-	% type = 1: blue figure (calculate angles of a blue figure
-	% type = 2: purple figure (calculate the angle of a purple figure)
+	% type = 0: purple figure (calculate the angle of a purple figure)
+	% type = 1: blue figure (calculate angles of a blue figure)
 	if_then_else {type == 1} {
-		number type1 1
-		number type2 2
+		number type1 0
+		number type2 1
 	} {
-		number type1 3
-		number type2 3 
+		number type1 2
+		number type2 2 
 	}
 
 	call calculate_angle {ang type1 ang1}
@@ -113,53 +113,55 @@ procedure draw {x y size ang type}
 	} { }
 }
 
+number size 15
+expression width {1.52 * 7 * size}
+expression height {1.52 * 7 * size}
+expression x {width / 2 -  size / 2} % x coord of the starting point
+expression y {height - 1.5 *  size} % y coord of the starting point
+point I 0 0 6480 0 % for every frame of animation, it's increased by 20 (6480 points / 324 frames)
+
 background 0 0 0
-dim 150 150
+dim width height
 
-point I 0 0 6480 0 % for every step of animation, it increases by 20
-
-number j 1
-number tmp 0
-number x 85
-number y 125
-
-while {j <= 7}
+number row 1 % current row
+number len row % length of the current row
+while {row <= 7}
 {
-	call mod { j 2 tmp }
-	number k 0
-	number len j
+	call mod { row 2 type } % determines type of figures in the row by row id
+
+	number figure_id 0
+	while { figure_id < len }
+	{
+		getx iter I
+		expression addition {4 * sin(iter / 20 * 2 * 3.14 / 81)} % intensity and direction of left-right deviation (periodic: 0 -  8pi)
+		
+		if_then_else {type == 1} { % blue figure
+			expression cur_size {size + 5 * sin(iter / 20 * 2 * 3.14 / 81)}
+			expression cur_x {x + figure_id * 2 * 1.5 * size + addition}
+			expression iter {iter * ceil(row/2) / 4}
+			color 135 206 250
+		}{ % purple figure
+			expression cur_size {size + 5 * cos( iter / 20 * 2 * 3.14 / 81)}
+			expression cur_x {x + figure_id * 2 * 1.5 * size - addition}
+			expression iter {4/3 * iter / row}
+			 color 138 43 226
+		}
+		
+		call draw { cur_x y cur_size iter type }
+		expression figure_id {figure_id + 1}
+	}
+	expression row {row + 1}
+	expression y {y - 1.5 * size}
+	
+	%calculate length of the next row
+	expression len {row}
 	if_then_else {len > 4}
 	{
 		expression len {8 - len}
-		expression x {x + 20}
+		expression x {x + 1.5 * size}
 	} {
-		expression x {x - 20}
+		expression x {x - 1.5 * size}
 	}
-
-	while { k < len }
-	{
-		getx i1 I
-		expression addition {4 * sin(i1 / 20 * 2 * 3.14 / 81)} % 0 -  8pi
-		
-		if_then_else {tmp == 1}
-		{
-			expression size {15 + 5 * sin(i1 / 20 * 2 * 3.14 / 81)}
-			expression tmpx {x + k * 40 + addition}
-			expression i1 {i1 * ceil(j/2) / 4}
-			color 135 206 250
-			call draw { tmpx y size i1 1 }
-		}{
-			expression size {15 + 5 * cos( i1 / 20 * 2 * 3.14 / 81)}
-			expression tmpx {x + k * 40 - addition}
-			expression i1 {4/3 * i1 / j}
-			 color 138 43 226
-			 call draw { tmpx y size i1 2 }
-		}
-		
-		expression k {k + 1}
-	}
-	expression j {j + 1}
-	expression y {y - 20}
 }
 
 animation_frames 324 50
