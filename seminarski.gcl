@@ -3,39 +3,37 @@ procedure mod {num1 num2 res}
 	expression res {num1 - floor(num1 / num2) * num2}
 }
 
-procedure transform_angle {ang new_ang type}
+% For a given iteration and type of figure, function calculates the angle
+procedure calculate_angle {iteration type res_angle}
 {
-	% 360 + (140 + 360 + 330) + 360
-	% 500 + 360 + 360
-
 	if_then_else {type == 1} {
-		call mod {ang 1550 new_ang}
-		if_then_else {new_ang < 360 || new_ang > 1190} {
-			if_then_else {new_ang > 1190} {
-				expression new_ang {-(new_ang - 1190)}
+		call mod {iteration 1550 res_angle}
+		if_then_else {res_angle < 360 || res_angle > 1190} {
+			if_then_else {res_angle > 1190} {
+				expression res_angle {-(res_angle - 1190)}
 			} { }
 		} {
-			expression new_ang {359.9}
+			expression res_angle {359.9}
 		}
 	} {
 	if_then_else {type == 2} {
-		call mod {ang 1550 new_ang}
-		if_then_else {new_ang <= 500 || new_ang >= 1220} {
-			expression new_ang {0}
+		call mod {iteration 1550 res_angle}
+		if_then_else {res_angle <= 500 || res_angle >= 1220} {
+			expression res_angle {0}
 		} {
-			if_then_else {new_ang > 500 && new_ang < 860} {
-				expression new_ang {new_ang - 500}
+			if_then_else {res_angle > 500 && res_angle < 860} {
+				expression res_angle {res_angle - 500}
 			} {
-				expression new_ang {-(new_ang - 500 - 360)}
+				expression res_angle {-(res_angle - 500 - 360)}
 			}
 		}
 	} {
-		expression tmp {floor(ang / 360)}
+		expression tmp {floor(iteration / 360)}
 		call mod {tmp 2 tmp}
-		call mod {ang 360 new_ang}
+		call mod {iteration 360 res_angle}
 		if_then_else {tmp == 1}
 		{
-			expression new_ang {-new_ang}	
+			expression res_angle {-res_angle}	
 		} { }
 	}
 	}
@@ -49,8 +47,8 @@ procedure draw {x y size ang1 ang2 type}
 		expression type1 {1}
 		expression type2 {2}
 	} { }
-	call transform_angle {ang1 ang1 type1}
-	call transform_angle {ang2 ang2 type2}
+	call calculate_angle {ang1 type1 ang1}
+	call calculate_angle {ang2 type2 ang2}
 
 	number x1 x
 	number y1 y
@@ -156,6 +154,7 @@ while {j <= 7}
 }
 
 animation_frames 2880 60
+
 
 
 
