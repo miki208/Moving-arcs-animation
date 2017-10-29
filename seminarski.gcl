@@ -6,25 +6,27 @@ procedure mod {num1 num2 res}
 % For a given iteration and type of figure, function calculates the angle
 procedure calculate_angle {iteration type res_angle}
 {
+	% 1620 = 360 + (225 + 360 + 315) + 360
+	% 1620 = (585) + 360 + 360 + (315)
 	if_then_else {type == 1} {
-		call mod {iteration 1550 res_angle}
-		if_then_else {res_angle < 360 || res_angle > 1190} {
-			if_then_else {res_angle > 1190} {
-				expression res_angle {-(res_angle - 1190)}
+		call mod {iteration 1620 res_angle}
+		if_then_else {res_angle < 360 || res_angle > 1620 - 360} {
+			if_then_else {res_angle > 1620 - 360} {
+				expression res_angle {-(res_angle - (1620 - 360))}
 			} { }
 		} {
 			expression res_angle {359.9}
 		}
 	} {
 	if_then_else {type == 2} {
-		call mod {iteration 1550 res_angle}
-		if_then_else {res_angle <= 500 || res_angle >= 1220} {
+		call mod {iteration 1620 res_angle}
+		if_then_else {res_angle <= 585  || res_angle >= 1620 - 315} {
 			expression res_angle {0}
 		} {
-			if_then_else {res_angle > 500 && res_angle < 860} {
-				expression res_angle {res_angle - 500}
+			if_then_else {res_angle > 585 && res_angle < 585 + 360} {
+				expression res_angle {res_angle - 585}
 			} {
-				expression res_angle {-(res_angle - 500 - 360)}
+				expression res_angle {-(res_angle - 585 - 360)}
 			}
 		}
 	} {
@@ -70,16 +72,6 @@ procedure draw {x y size ang1 ang2 type}
 	expression y4 {y1 + size}
 	point P4 x4 y4
 
-	%cmark_lt P1
-	%cmark_lt P2
-	%cmark_lt P3
-	%cmark_lt P4
-
-	%drawsegment P1 P2
-	%drawsegment P2 P4
-	%drawsegment P4 P3
-	%drawsegment P3 P1
-
 	expression xc {x1 + size / 2}
 	expression yc {y1 + size / 2}
 	point PC xc yc
@@ -104,9 +96,11 @@ procedure draw {x y size ang1 ang2 type}
 		fillarc PC3 P3 ang2
 	} { }
 }
+
 background 0 0 0
 dim 150 150
-point I 0 0 56480 0
+
+point I 0 0 6480 0 % for every step of animation, it increases by 20
 
 number j 1
 number tmp 0
@@ -129,22 +123,21 @@ while {j <= 7}
 	while { k < len }
 	{
 		getx i1 I
-		expression addition {4 * sin(i1 / 19.74 * 2 * 3.14 / 90)}
+		expression addition {4 * sin(i1 / 20 * 2 * 3.14 / 81)} % 0 -  8pi
+		
 		if_then_else {tmp == 1}
 		{
-			expression size {15 + 5 * sin(i1 / 19.74 * 2 * 3.14 / 90)}
+			expression size {15 + 5 * sin(i1 / 20 * 2 * 3.14 / 81)}
 			expression tmpx {x + k * 40 + addition}
-			expression i1 {i1 / (8 - j)}
-			expression i2 {i1 + tmp * 360}
+			expression i1 {i1 * ceil(j/2) / 4}
 			color 135 206 250
 			call draw { tmpx y size i1 i1 1 }
 		}{
-			expression size {15 + 5 * cos(i1 / 19.74 * 2 * 3.14 / 90)}
+			expression size {15 + 5 * cos( i1 / 20 * 2 * 3.14 / 81)}
 			expression tmpx {x + k * 40 - addition}
-			expression i1 {i1 / j}
-			expression i2 {i1  + tmp * 360}
+			expression i1 {4/3 * i1 / j}
 			 color 138 43 226
-			 call draw { tmpx y size i2 i1 2 }
+			 call draw { tmpx y size i1 i1 2 }
 		}
 		
 		expression k {k + 1}
@@ -153,10 +146,7 @@ while {j <= 7}
 	expression y {y - 20}
 }
 
-animation_frames 2880 60
-
-
-
+animation_frames 324 50
 
 
 
